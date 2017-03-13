@@ -87,5 +87,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Custom Ignores
 .DS_Store
 stats.json
