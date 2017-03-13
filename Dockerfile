@@ -1,6 +1,7 @@
 FROM python:2.7
 
-COPY . /app
+# This dockerfile assumes that when you run the application you use a mounted drive
+# in the location of this git repository.
 
 WORKDIR /app
 
