@@ -1,0 +1,18 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+	"editor.renderWhitespace": "all",
+	"editor.tabSize": 4,
+	"editor.insertSpaces": false,
+	"window.zoomLevel": 0,
+	"python.linting.enabled": false,
+	"typescript.check.tscVersion": false,
+	"workbench.colorTheme": "Visual Studio Dark",
+	"workbench.iconTheme": "vs-seti",
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/.DS_Store": true,
+		"*.pyc": {"when": "$(basename).py"}
+	}
+}
