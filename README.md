@@ -20,6 +20,12 @@ any pre-existing index.
 python main.py --build index-name
 ```
 
+After running this (or any) command sucessfully, a file will be placed in the local directory named `stats.json`. This file
+is just used as a temporary file that contains the overall size of the index (field length). This is required because the index
+fields are generated on the fly given the dynamic nature of a document based database such as MongoDB. When pulling data from the database,
+the index fields are populated dynaimcally using just the indexed column. For this reason, the data contained in each index field may not
+necessarily match up to that of another record. 
+
 ### Searching the index
 
 To search the index, do the following command. The command will return the to 10 results (full document) for the search parameter, and it will also display the score acheived by the query. The runtime of the query is also displayed above the query results.

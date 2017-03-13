@@ -4,6 +4,7 @@ from indexes import SchemaBuilder, IndexManager
 import json
 import os
 import argparse
+import datetime
 
 def setup(db):
 	""" Gets the maximum size of the index fields and caches it if needed. """
