@@ -68,12 +68,13 @@ class SchemaBuilder(object):
 
 	def normalize_flattened(self, flattened, mapping):
 		""" Swaps the properties so that prop1 through prop5 are the important text values. """
-		for source, dest in mapping.iteritems():
+		for source, dest in mapping:
+			# print "Swapping {0} with {1}".format(flattened[dest], flattened[source])
+			
+			temp = flattened[dest]
 
-			temp = flattened[source]
-
-			flattened[source] = flattened[dest]
-			flattened[dest] = temp
+			flattened[dest] = flattened[source]
+			flattened[source] = temp
 
 		return flattened
 
@@ -181,13 +182,11 @@ class IndexManager(object):
 		""" Indexes the players collection. """
 		builder = SchemaBuilder()
 
-		mapping = {
-			"prop2": "prop1",
-			"prop3": "prop2",
-			"prop9": "prop3",
-			"prop10": "prop4",
-			"prop25": "prop5"
-		}
+		mapping = [
+			("prop24", "prop2"),
+			("prop10", "prop4"),
+			("prop24", "prop5")
+		]
 
 		total = self.__db.players.count()
 		current = 0
@@ -204,11 +203,11 @@ class IndexManager(object):
 		""" Indexes the restaraunts collection. """
 		builder = SchemaBuilder()
 
-		mapping = {
-			"prop3": "prop1",
-			"prop3": "prop2",
-			"prop5": "prop4"
-		}
+		mapping = [
+			("prop2", "prop1"),
+			("prop3", "prop2"),
+			("prop5", "prop4")
+		]
 
 		total = self.__db.restaurants.count()
 		current = 0
