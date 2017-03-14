@@ -51,7 +51,9 @@ def main():
 		print "==== Runtime: {0} ====".format(results.time)
 		print "==== Documents Returned: {0} ====".format(len(results.documents))
 		for doc in results.documents:
-			print doc
+			val = doc['document']
+
+			print "{0}, {1}, {2}, {3}, {4}".format(val['prop1'], val['prop2'], val['prop3'], val['prop4'], val['prop5'])
 
 	return 0
 

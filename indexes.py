@@ -33,22 +33,20 @@ class SchemaBuilder(object):
 
 	def build(self, document, size):
 		""" Builds a schema based on the proeprties of a given document. """
-		results = self.__build_normalized_base(document, size, True)
+		results = self.__build_normalized_base(document, size, False)
 
-		self.__proccess_document(document, 0, results, self.__assign_value)
+		self.__proccess_document(document, 0, results, False)
 
 		return Schema(**results)
 
-	def build_values(self, document, size):
-		results = self.__build_normalized_base(document, size, False)
-
-		def handler(name, value, container):
-			container[name] = unicode(value)
-
-		self.__proccess_document(document, 0, results, handler)
+	def flatten(self, document, size):
+		""" Flattens a document for indexing. """
+		results = self.__build_normalized_base(document, size, True)
+		self.__proccess_document(document, 0, results, True)
 		return results
 
 	def find_max_info(self, db):
+		""" Finds the record with the largest field count (i.e. max index size). """
 		current = (0, None)
 		for player in db.players.find():
 			count = self.count_fields(player)
@@ -57,17 +55,8 @@ class SchemaBuilder(object):
 
 		return current
 
-	def __build_normalized_base(self, document, size, isForSchema):
-		result = {}
-		for index in range(1, size+1):
-			if isForSchema:
-				result[self.__make_prop_name(index)] = TEXT
-			else:
-				result[self.__make_prop_name(index)] = None
-		
-		return result
-
 	def count_fields(self, document):
+		""" Counts the total amount of fields (including nested documents) for a document. """
 		count = 0
 		for key, value in document.iteritems():
 			valType = type(value)
@@ -77,13 +66,24 @@ class SchemaBuilder(object):
 				count += 1
 		return count
 
-	def __proccess_document(self, document, index, results, handler):
+	def normalize_flattened(self, flattened, mapping):
+		""" Swaps the properties so that prop1 through prop5 are the important text values. """
+		for source, dest in mapping.iteritems():
+
+			temp = flattened[source]
+
+			flattened[source] = flattened[dest]
+			flattened[dest] = temp
+
+		return flattened
+
+	def __proccess_document(self, document, index, results, isFlattening):
 		""" Process a given document and converts the properties to index properties. """
 
 		for key, value in document.iteritems():
 			valType = type(value)
 			if(valType == dict):
-				index = self.__proccess_document(value, index, results, handler)
+				index = self.__proccess_document(value, index, results, isFlattening)
 			else:
 				if value == None:
 					# bad value, so assume string and set to unicode.
@@ -91,11 +91,28 @@ class SchemaBuilder(object):
 
 				index += 1
 				actualName = self.__make_prop_name(index)
-				handler(actualName, value, results)
+				if isFlattening:
+					self.__assign_value(actualName, value, results)
+				else:
+					self.__assign_index_type(actualName, value, results)
 
 		return index
 
+	def __build_normalized_base(self, document, size, isFlattening):
+		result = {}
+		for index in range(1, size+1):
+			if isFlattening:
+				result[self.__make_prop_name(index)] = None
+			else:
+				result[self.__make_prop_name(index)] = TEXT
+		
+		return result
+
 	def __assign_value(self, name, value, structure):
+		""" Maps a property name to a index type. """
+		structure[name] = unicode(value)
+
+	def __assign_index_type(self, name, value, structure):
 		""" Maps a property name to a index type. """
 		structure[name] = TEXT(analyzer=StemmingAnalyzer(), stored=True)
 
@@ -164,11 +181,22 @@ class IndexManager(object):
 		""" Indexes the players collection. """
 		builder = SchemaBuilder()
 
+		mapping = {
+			"prop2": "prop1",
+			"prop3": "prop2",
+			"prop9": "prop3",
+			"prop10": "prop4",
+			"prop25": "prop5"
+		}
+
 		total = self.__db.players.count()
 		current = 0
 		for player in self.__db.players.find({}):
-			document = builder.build_values(player, self.__index_size)
-			writer.add_document(**document)
+			document = builder.flatten(player, self.__index_size)
+			flattened = builder.normalize_flattened(document, mapping)
+
+			# Now reaarange property names for normalizing.
+			writer.add_document(**flattened)
 			current += 1
 			print "Players Indexed {0}/{1}".format(current, total)
 
@@ -176,10 +204,18 @@ class IndexManager(object):
 		""" Indexes the restaraunts collection. """
 		builder = SchemaBuilder()
 
+		mapping = {
+			"prop3": "prop1",
+			"prop3": "prop2",
+			"prop5": "prop4"
+		}
+
 		total = self.__db.restaurants.count()
 		current = 0
 		for rest in self.__db.restaurants.find({}):
-			document = builder.build_values(rest, self.__index_size)
-			writer.add_document(**document)
+			document = builder.flatten(rest, self.__index_size)
+			flattened = builder.normalize_flattened(document, mapping)
+
+			writer.add_document(**flattened)
 			current += 1
 			print "Restaurants Indexed {0}/{1}".format(current, total)
