@@ -24,9 +24,12 @@ def setup(db):
 	return biggestRecord[0]
 
 def get_args():
+	""" Handles arguement parsing. """
 	parser = argparse.ArgumentParser(description='Performs operations on indexes')
 	parser.add_argument('--search', type=str, metavar='Query', help='searches the index')
-	parser.add_argument('--build', action='store_true', help='rebuilds the index (requires network)')
+	parser.add_argument('--build', action='store_true', help='rebuilds the index')
+	parser.add_argument('--expand', action='store_true', 
+		help='if specified, exapands the results to their full contents and also displays their score.')
 	parser.add_argument('index', type=str, help='the name of the index to operate on')
 	return vars(parser.parse_args())
 
@@ -48,12 +51,15 @@ def main():
 		results = manager.search(arg['search'])
 		print "Done searching index."
 
-		print "==== Runtime: {0} ====".format(results.time)
-		print "==== Documents Returned: {0} ====".format(len(results.documents))
+		print "==== Documents Returned in {0} s: {1} ====".format(results.time, len(results.documents))
 		for doc in results.documents:
-			val = doc['document']
-
-			print "{0}, {1}, {2}, {3}, {4}".format(val['prop1'], val['prop2'], val['prop3'], val['prop4'], val['prop5'])
+			if arg['expand']:
+				# Print everything, score and document.
+				print doc
+			else:
+				# Condensed vesion, only print top 5 properties.
+				val = doc['document']
+				print "{0}, {1}, {2}, {3}, {4}".format(val['prop1'], val['prop2'], val['prop3'], val['prop4'], val['prop5'])
 
 	return 0
 
