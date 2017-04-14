@@ -193,6 +193,26 @@ class IndexManager(object):
 		for player in self.__db.players.find({}):
 			document = builder.flatten(player, self.__index_size)
 			flattened = builder.normalize_flattened(document, mapping)
+			flattened = {
+				'prop1': flattened['prop1'],
+				'prop2': flattened['prop2'],
+				'prop3': flattened['prop3'],
+				'prop4': flattened['prop4'],
+				'prop5': flattened['prop5'],
+			}
+
+			# flattened = (**flattened)[0:5]
+			# results = {}
+			# count = 0
+			# for key, val in flattened.iteritems():
+			# 	if count == 4:
+			# 		break
+			# 	results[key] = val
+			# 	count += 1
+
+			
+			# print results
+			# print flattened[flattened.keys()[0:5]]
 
 			# Now reaarange property names for normalizing.
 			writer.add_document(**flattened)
@@ -214,6 +234,14 @@ class IndexManager(object):
 		for rest in self.__db.restaurants.find({}):
 			document = builder.flatten(rest, self.__index_size)
 			flattened = builder.normalize_flattened(document, mapping)
+
+			flattened = {
+				'prop1': flattened['prop1'],
+				'prop2': flattened['prop2'],
+				'prop3': flattened['prop3'],
+				'prop4': flattened['prop4'],
+				'prop5': flattened['prop5'],
+			}
 
 			writer.add_document(**flattened)
 			current += 1

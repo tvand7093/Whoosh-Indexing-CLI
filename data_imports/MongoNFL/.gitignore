@@ -1,0 +1,6 @@
+**/*.pyc
+**/*.pye
+.DS_Store
+*~
+mysql-data
+.env
