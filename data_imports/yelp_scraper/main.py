@@ -4,6 +4,7 @@ from yelp.oauth1_authenticator import Oauth1Authenticator
 from state_seeder import StateSeeder
 from pymongo import MongoClient, TEXT
 from config import Config
+import urllib
 
 def mongoConnect(params):
     password = urllib.quote_plus(params.MONGO_PASS)
@@ -51,7 +52,7 @@ params = {
     'limit' : 20,
 }
 
-with open("city_names.txt") as f:
+with open("data_imports/yelp_scraper/city_names.txt") as f:
     lines = f.readlines()
 
 states = StateSeeder()
